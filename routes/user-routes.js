@@ -14,8 +14,8 @@ router.get('/user', verifyToken, getUser)
 
 
 passport.use(new GoogleStrategy({
-  clientID: '424183470564-13vpt0to40j37bt6d1df0obo5sdhkhq5.apps.googleusercontent.com',
-  clientSecret: "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",
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: "http://localhost:8080/auth/google/callback"
 },
  function  (request, accessToken, refreshToken, profile, done,req, res) {
