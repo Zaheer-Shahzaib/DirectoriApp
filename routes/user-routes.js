@@ -2,76 +2,61 @@ const express = require('express');
 const { signup, login, verifyToken, getUser, loginWithGoogle } = require('../controllers/user-controlers');
 const router = express.Router();
 const passport = require('passport')
-const GoogleStrategy = require('passport-google-oauth20').Strategy
-const User = require('../models/User_model');
 
-
+const User=require('../models/User_model')
+const config = require('../utils/config')
+const jwt=require('jsonwebtoken')
+const dotenv = require('dotenv');
+const { facebookLogin, googleLogin } = require('../utils/auth');
+dotenv.config();
 router.post('/signup', signup)
 router.post('/login', login)
 router.get('/user', verifyToken, getUser)
 
+
+
+
+
+
+/////////////////Facebook login////////////
+
+router.get('/auth/facebook',  passport.authenticate('facebook',{
+  session:false,
+  scope: ['public_profile', 'email']
+},facebookLogin));
+
+router.get('/auth/facebook/callback',
+  passport.authenticate('facebook', {
+    successRedirect: '/profile',
+    failureRedirect: '/failed',
+    session:true
+  }));
+
+
 ////////////login google//////////////
 
 
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "http://localhost:8080/auth/google/callback"
-},
- function  (request, accessToken, refreshToken, profile, done,req, res) {
-  console.log(profile.displayName)
 
-    //     User.save({ name: profile.displayName, googleId: profile.id }, 
-    // function (err, user) {
-    //     return cb(err, user);
-    // });
-// console.log(profile.email);
-//   let exitingUser;
-//   try {
-//       exitingUser = await User.findOne({ email: profile.emails })
-//   } catch (error) {
-//       console.log(error);
-//   }
-//   if (exitingUser) {
-//       return ({ message: "User Alread Exist with this mail" })
-//   }
-//   const user = new User({
-//     name:profile.displayName,
-//     googleId:profile.id,
-//     email:profile.email,
-//     authType:'google'
-//   })
-//   try {
-//       await user.save();
-//   }
-//   catch (err) {
-//       console.log(err);
-//   }
+router.get('/auth/google', passport.authenticate('google', {
+  session:false,
+  scope: ['profile', 'email']
+}, googleLogin));
 
-//   return (user)
-  // console.log(profile.displayName);
-  //   User.findOne({email:profile.email}).then((data)=>{
-  //     if(data){
-  //       res.status(200).send({message:'User Already exist'})
-  //       return done(null, data)
-  //     }
-  //     else{
-  //       const user = new User({
-          
-  //     })
-  //     user.save()
-  //     }
-  //   })
-  }
-));
+router.get('/auth/google/callback',
+  passport.authenticate('google', {
+    successRedirect: '/profile',
+    failureRedirect: '/failed',
+    session:true
+  }));
+
 
 passport.serializeUser((user, cb) => {
-  cb(null, user.id);
+  cb(null, user._id);
 });
 passport.deserializeUser((id, cb) => {
-  User.findById(id).then((user) => {
+  User.findById(id).then((user)=>{
     cb(null, user);
-  }).catch(err => { return cb(err) })
+  }).catch(err=>{ return cb(err)})
 });
 
 

@@ -7,7 +7,7 @@ const userSchema = new Schema({
     },
     email: {
         type: String,
-        require: true,
+       require: true,
         unique: true,
     },
     password: {
@@ -18,7 +18,7 @@ const userSchema = new Schema({
     authType: {
         type: String,
         required: true,
-        enum: ["Local", "google"],
+        enum: ["Local", "google", "facebook"],
     },
     googleId: {
         type: String,
