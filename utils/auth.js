@@ -1,6 +1,6 @@
 const FacebookStrategy = require('passport-facebook').Strategy
 const GoogleStrategy = require('passport-google-oauth20').Strategy
-
+const {OAuth2Client} = require('google-auth-library').AuthClient
 const passport = require('passport')
 const User = require('../models/User_model');
 
@@ -19,6 +19,7 @@ const facebookLogin = passport.use(new FacebookStrategy({
 ));
 
 /////////////login with google ///////////
+
 const googleLogin = passport.use(new GoogleStrategy({
     clientID: "938396630153-tgu5ukjk7glt9mvt5dukm0ghhqiti8r0.apps.googleusercontent.com",
     clientSecret: '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',
@@ -29,6 +30,7 @@ const googleLogin = passport.use(new GoogleStrategy({
         console.log(profile.photos[0].value);
         console.log(profile.emails[0].value)
         console.log(profile.id);
+      
         try {
             let foundUser = await User.findOne({ googleId: profile.id });
             if (!foundUser) {
@@ -47,12 +49,7 @@ const googleLogin = passport.use(new GoogleStrategy({
                     return done(err, false);
                 }
                 //  Creating our backend logic acces token not using googles access token
-                res.cookie(String(createdUser._id), accessToken, {
-                    path: "/",
-                    expires: new Date(Date.now() + 1000 * 30),
-                    httpOnly: true,
-                    sameSite: 'lax'
-                })
+              
                 return done(null, createdUser, accessToken);
             }
             //  Creating our backend logic acces token not using googles access token
